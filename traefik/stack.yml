@@ -1,0 +1,28 @@
+networks:
+  traefiknet:
+    external: true
+    driver: overlay
+
+services:
+  proxy:
+    image: traefik:v3.3
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./log:/var/log
+    ports:
+      - target: 80
+    published: 80
+    protocol: http
+    mode: host
+    networks:
+      - traefiknet
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.api.rule=Host(`legalplus-dev-proxy.cafstechnology.id`)"
+        - "traefik.http.routers.api.service=api@internal"
+        - "traefik.http.services.api.loadbalancer.server.port=8080"
