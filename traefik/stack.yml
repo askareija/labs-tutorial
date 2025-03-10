@@ -12,9 +12,9 @@ services:
       - ./log:/var/log
     ports:
       - target: 80
-    published: 80
-    protocol: http
-    mode: host
+        published: 80
+        protocol: http
+        mode: host
     networks:
       - traefiknet
     deploy:
