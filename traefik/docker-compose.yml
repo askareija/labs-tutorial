@@ -1,0 +1,34 @@
+networks:
+    proxynet:
+        external: true
+
+services:
+    reverse-proxy:
+        image: traefik:v3.4
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.traefik.rule=Host(`dashboard.traefik.local`)"
+            - "traefik.http.routers.traefik.entrypoints=websecure"
+            - "traefik.http.routers.traefik.tls=true"
+            - "traefik.http.routers.traefik.service=traefik@docker"
+            - "traefik.http.routers.traefik.middlewares=auth@file,real-ip@file,secure-headers@file"
+            - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+        restart: always
+        deploy:
+            resources:
+                limits:
+                    cpus: "2"
+                    memory: "2g"
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            # So that Traefik can listen to the Docker events
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /home/aden/certs:/certs:ro
+            - ./log:/var/log
+
+            - "./config/traefik.yml:/etc/traefik/traefik.yml:ro"
+            - "./config/dynamic.yml:/etc/traefik/dynamic.yml:ro"
+        networks:
+            - proxynet

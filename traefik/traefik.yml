@@ -1,53 +1,85 @@
 global:
-  checkNewVersion: true
-  sendAnonymousUsage: true
+    checkNewVersion: true
+    sendAnonymousUsage: true
 
 entryPoints:
-  web:
-    address: :80
-    forwardedHeaders:
-      trustedIPs:
-        - "127.0.0.1/32"
-        - "10.0.0.0/8"
-        - "172.16.0.0/12"
-        - "192.168.0.0/16"
+    web:
+        address: :80
+        forwardedHeaders:
+            trustedIPs:
+                - "127.0.0.1/32"
+                - "10.0.0.0/8"
+                - "172.16.0.0/12"
+                - "192.168.0.0/16"
+                # Cloudflare IPs
+                - "173.245.48.0/20"
+                - "103.21.244.0/22"
+                - "103.22.200.0/22"
+                - "103.31.4.0/22"
+                - "141.101.64.0/18"
+                - "108.162.192.0/18"
+                - "190.93.240.0/20"
+                - "188.114.96.0/20"
+                - "197.234.240.0/22"
+                - "198.41.128.0/17"
+                - "162.158.0.0/15"
+                - "104.16.0.0/13"
+                - "104.24.0.0/14"
+                - "172.64.0.0/13"
+                - "131.0.72.0/22"
+        http:
+            redirections:
+                entryPoint:
+                    to: websecure
+                    scheme: https
+
+    websecure:
+        address: :443
+        forwardedHeaders:
+            trustedIPs:
+                - "127.0.0.1/32"
+                - "10.0.0.0/8"
+                - "172.16.0.0/12"
+                - "192.168.0.0/16"
+                # Cloudflare IPs
+                - "173.245.48.0/20"
+                - "103.21.244.0/22"
+                - "103.22.200.0/22"
+                - "103.31.4.0/22"
+                - "141.101.64.0/18"
+                - "108.162.192.0/18"
+                - "190.93.240.0/20"
+                - "188.114.96.0/20"
+                - "197.234.240.0/22"
+                - "198.41.128.0/17"
+                - "162.158.0.0/15"
+                - "104.16.0.0/13"
+                - "104.24.0.0/14"
+                - "172.64.0.0/13"
+                - "131.0.72.0/22"
 
 log:
-  level: INFO
-  filePath: /var/log/traefik.log
+    level: DEBUG
+    filePath: /var/log/traefik.log
 
 accessLog:
-  filePath: /var/log/traefik-access.log
+    filePath: /var/log/traefik-access.log
 
 api:
-  dashboard: true
-  insecure: true
+    insecure: true
+    dashboard: true
 
 providers:
-  swarm:
-    network: traefiknet
-    exposedByDefault: false
+    docker:
+        network: proxynet
+        exposedByDefault: false
+        watch: true
+    file:
+        filename: /etc/traefik/dynamic.yml
+        watch: true
+
+tcpServersTransport:
+    tls:
+        insecureSkipVerify: true
 
 ping: {}
-
-# Middleware tambahan untuk keamanan
-http:
-  middlewares:
-    real-ip:
-      headers:
-        customRequestHeaders:
-          X-Real-IP: "X-Real-IP"
-          X-Forwarded-For: "X-Forwarded-For"
-          X-Forwarded-Proto: "X-Forwarded-Proto"
-          X-Forwarded-Host: "X-Forwarded-Host"
-    secure-headers:
-      headers:
-        frameDeny: true
-        sslRedirect: false
-        browserXssFilter: true
-        contentTypeNosniff: true
-        forceSTSHeader: false
-        stsIncludeSubdomains: false
-        stsPreload: false
-        customResponseHeaders:
-          X-Powered-By: ""
