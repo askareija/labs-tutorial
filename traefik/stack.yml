@@ -7,9 +7,17 @@ services:
   proxy:
     image: traefik:v3.4
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./traefik.yml:/etc/traefik/traefik.yml:ro
-      - ./log:/var/log
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./certs:/certs:ro
+      - ./logs:/var/log
+
+      - "./config/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "./config/dynamic.yml:/etc/traefik/dynamic.yml:ro"
+
+      # Local timezone
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
     ports:
       - target: 80
         published: 80
@@ -23,6 +31,8 @@ services:
           - node.role == manager
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.api.rule=Host(`your-traefik-dashboard.com`)"
-        - "traefik.http.routers.api.service=api@internal"
-        - "traefik.http.services.api.loadbalancer.server.port=8080"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.com`)"
+        - "traefik.http.routers.traefik.entrypoints=web"
+        - "traefik.http.routers.traefik.service=traefik@docker"
+        - "traefik.http.routers.traefik.middlewares=basic_auth@file,real-ip@file,secure-headers@file"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"

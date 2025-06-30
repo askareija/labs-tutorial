@@ -1,0 +1,27 @@
+http:
+  middlewares:
+    basic_auth:
+      basicAuth:
+        users:
+          - "admin:$2y$10$M8ioRrDst.2I2MYF6KFj9OB07phTbeaft9kJLJIRRyov7/ekmJM1a"
+
+    secure-headers:
+      headers:
+        frameDeny: true
+        sslRedirect: false
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: false
+        stsIncludeSubdomains: false
+        stsPreload: false
+        customResponseHeaders:
+          X-Powered-By: ""
+
+    real-ip:
+      headers:
+        customRequestHeaders:
+          X-Real-IP: "X-Real-IP"
+          CF-Connecting-IP: "CF-Connecting-IP"
+          X-Forwarded-For: "X-Forwarded-For"
+          X-Forwarded-Proto: "X-Forwarded-Proto"
+          X-Forwarded-Host: "X-Forwarded-Host"

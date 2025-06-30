@@ -70,8 +70,8 @@ api:
     dashboard: true
 
 providers:
-    docker:
-        network: proxynet
+    swarm:
+        network: traefiknet
         exposedByDefault: false
         watch: true
     file:
